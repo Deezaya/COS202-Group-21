@@ -4,9 +4,13 @@ import com.univendor.backend.category.Category;
 import com.univendor.backend.category.CategoryRepository;
 import com.univendor.backend.common.ForbiddenException;
 import com.univendor.backend.common.NotFoundException;
+import com.univendor.backend.review.ReviewRepository;
+import com.univendor.backend.review.VendorRatingSummary;
 import com.univendor.backend.user.User;
 import com.univendor.backend.user.UserRepository;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,25 +20,27 @@ public class VendorService {
     private final VendorRepository vendorRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     public VendorService(VendorRepository vendorRepository, CategoryRepository categoryRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository, ReviewRepository reviewRepository) {
         this.vendorRepository = vendorRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     public List<VendorResponse> listVendors(String categorySlug, String keyword, String hall, String faculty,
             String priceTier) {
-        return vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier).stream()
-                .map(VendorResponse::from)
-                .toList();
+        List<Vendor> vendors = vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier);
+        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.stream().map(Vendor::getId).toList());
+        return vendors.stream().map(v -> toResponse(v, ratings)).toList();
     }
 
     public VendorResponse getVendor(Long id) {
-        return vendorRepository.findByIdWithCategory(id)
-                .map(VendorResponse::from)
+        Vendor vendor = vendorRepository.findByIdWithCategory(id)
                 .orElseThrow(() -> new NotFoundException("Vendor " + id + " not found"));
+        return toResponse(vendor, ratingsFor(List.of(id)));
     }
 
     public VendorResponse createVendor(VendorCreateRequest request, Long ownerId) {
@@ -54,7 +60,8 @@ public class VendorService {
                 request.priceTier(),
                 owner);
 
-        return VendorResponse.from(vendorRepository.save(vendor));
+        // A brand-new vendor provably has zero reviews - no need to query for it.
+        return VendorResponse.from(vendorRepository.save(vendor), 0.0, 0L);
     }
 
     @Transactional
@@ -77,7 +84,8 @@ public class VendorService {
                 request.faculty(),
                 request.priceTier());
 
-        return VendorResponse.from(vendorRepository.save(vendor));
+        Vendor saved = vendorRepository.save(vendor);
+        return toResponse(saved, ratingsFor(List.of(id)));
     }
 
     @Transactional
@@ -93,5 +101,24 @@ public class VendorService {
         if (ownerId == null || !ownerId.equals(requesterId)) {
             throw new ForbiddenException("You do not own this vendor listing");
         }
+    }
+
+    private Map<Long, VendorRatingSummary> ratingsFor(List<Long> vendorIds) {
+        if (vendorIds.isEmpty()) {
+            return Map.of();
+        }
+        return reviewRepository.summarizeRatings(vendorIds).stream()
+                .collect(Collectors.toMap(VendorRatingSummary::vendorId, s -> s));
+    }
+
+    private VendorResponse toResponse(Vendor vendor, Map<Long, VendorRatingSummary> ratings) {
+        VendorRatingSummary summary = ratings.get(vendor.getId());
+        double averageRating = summary == null ? 0.0 : round1(summary.averageRating());
+        long reviewCount = summary == null ? 0L : summary.reviewCount();
+        return VendorResponse.from(vendor, averageRating, reviewCount);
+    }
+
+    private static double round1(double value) {
+        return Math.round(value * 10.0) / 10.0;
     }
 }

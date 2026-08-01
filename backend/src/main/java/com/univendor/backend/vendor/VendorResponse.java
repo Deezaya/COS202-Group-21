@@ -16,9 +16,11 @@ public record VendorResponse(
         String hallOfResidence,
         String faculty,
         String priceTier,
-        Long ownerId) {
+        Long ownerId,
+        Double averageRating,
+        Long reviewCount) {
 
-    public static VendorResponse from(Vendor vendor) {
+    public static VendorResponse from(Vendor vendor, double averageRating, long reviewCount) {
         return new VendorResponse(
                 vendor.getId(),
                 vendor.getName(),
@@ -32,6 +34,8 @@ public record VendorResponse(
                 vendor.getHallOfResidence(),
                 vendor.getFaculty(),
                 vendor.getPriceTier(),
-                vendor.getOwnerId());
+                vendor.getOwnerId(),
+                averageRating,
+                reviewCount);
     }
 }
