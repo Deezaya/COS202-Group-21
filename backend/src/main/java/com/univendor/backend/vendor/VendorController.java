@@ -25,8 +25,11 @@ public class VendorController {
     @GetMapping
     public List<VendorResponse> listVendors(
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String q) {
-        return vendorService.listVendors(category, q);
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String hall,
+            @RequestParam(required = false) String faculty,
+            @RequestParam(required = false) String priceTier) {
+        return vendorService.listVendors(category, q, hall, faculty, priceTier);
     }
 
     @GetMapping("/{id}")

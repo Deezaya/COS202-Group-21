@@ -8,5 +8,8 @@ public record VendorCreateRequest(
         @NotBlank String categorySlug,
         @NotBlank String contactPhone,
         String contactWhatsapp,
-        String contactInstagram) {
+        String contactInstagram,
+        String hallOfResidence,
+        String faculty,
+        String priceTier) {
 }
