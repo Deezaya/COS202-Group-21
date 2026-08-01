@@ -2,6 +2,7 @@ package com.univendor.backend.vendor;
 
 import com.univendor.backend.category.Category;
 import com.univendor.backend.category.CategoryRepository;
+import com.univendor.backend.common.ConflictException;
 import com.univendor.backend.common.ForbiddenException;
 import com.univendor.backend.common.NotFoundException;
 import com.univendor.backend.review.ReviewRepository;
@@ -11,6 +12,8 @@ import com.univendor.backend.user.UserRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,11 +33,11 @@ public class VendorService {
         this.reviewRepository = reviewRepository;
     }
 
-    public List<VendorResponse> listVendors(String categorySlug, String keyword, String hall, String faculty,
-            String priceTier) {
-        List<Vendor> vendors = vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier);
-        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.stream().map(Vendor::getId).toList());
-        return vendors.stream().map(v -> toResponse(v, ratings)).toList();
+    public Page<VendorResponse> listVendors(String categorySlug, String keyword, String hall, String faculty,
+            String priceTier, Pageable pageable) {
+        Page<Vendor> vendors = vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier, pageable);
+        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.getContent().stream().map(Vendor::getId).toList());
+        return vendors.map(v -> toResponse(v, ratings));
     }
 
     public VendorResponse getVendor(Long id) {
@@ -94,6 +97,46 @@ public class VendorService {
                 .orElseThrow(() -> new NotFoundException("Vendor " + id + " not found"));
         requireOwnership(vendor, requesterId);
         vendorRepository.delete(vendor);
+    }
+
+    @Transactional
+    public VendorResponse requestVerification(Long id, Long requesterId) {
+        Vendor vendor = vendorRepository.findByIdWithCategory(id)
+                .orElseThrow(() -> new NotFoundException("Vendor " + id + " not found"));
+        requireOwnership(vendor, requesterId);
+
+        VerificationStatus status = vendor.getVerificationStatus();
+        if (status == VerificationStatus.PENDING || status == VerificationStatus.VERIFIED) {
+            throw new ConflictException("Vendor is already " + status.name().toLowerCase());
+        }
+
+        vendor.changeVerificationStatus(VerificationStatus.PENDING);
+        Vendor saved = vendorRepository.save(vendor);
+        return toResponse(saved, ratingsFor(List.of(id)));
+    }
+
+    public List<VendorResponse> listVendorsByStatus(VerificationStatus status) {
+        List<Vendor> vendors = vendorRepository.findByVerificationStatus(status);
+        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.stream().map(Vendor::getId).toList());
+        return vendors.stream().map(v -> toResponse(v, ratings)).toList();
+    }
+
+    @Transactional
+    public VendorResponse verifyVendor(Long id) {
+        return changeStatus(id, VerificationStatus.VERIFIED);
+    }
+
+    @Transactional
+    public VendorResponse rejectVendor(Long id) {
+        return changeStatus(id, VerificationStatus.REJECTED);
+    }
+
+    private VendorResponse changeStatus(Long id, VerificationStatus status) {
+        Vendor vendor = vendorRepository.findByIdWithCategory(id)
+                .orElseThrow(() -> new NotFoundException("Vendor " + id + " not found"));
+        vendor.changeVerificationStatus(status);
+        Vendor saved = vendorRepository.save(vendor);
+        return toResponse(saved, ratingsFor(List.of(id)));
     }
 
     private void requireOwnership(Vendor vendor, Long requesterId) {
