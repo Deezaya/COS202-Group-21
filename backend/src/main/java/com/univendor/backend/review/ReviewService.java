@@ -70,6 +70,13 @@ public class ReviewService {
         reviewRepository.delete(review);
     }
 
+    @Transactional
+    public void adminDeleteReview(Long id) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Review " + id + " not found"));
+        reviewRepository.delete(review);
+    }
+
     private void requireOwnership(Review review, Long requesterId) {
         if (!review.getUserId().equals(requesterId)) {
             throw new ForbiddenException("You do not own this review");
