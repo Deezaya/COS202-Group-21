@@ -1,8 +1,11 @@
 package com.univendor.backend.vendor;
 
 import com.univendor.backend.category.Category;
+import com.univendor.backend.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,8 +40,9 @@ public class Vendor {
 
     private String contactInstagram;
 
-    @Column(nullable = false)
-    private boolean verified = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status", nullable = false)
+    private VerificationStatus verificationStatus = VerificationStatus.NONE;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -49,12 +53,31 @@ public class Vendor {
 
     private String priceTier;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "owner_id")
+    private User owner;
+
     protected Vendor() {
     }
 
     public Vendor(String name, String description, Category category, String contactPhone,
                   String contactWhatsapp, String contactInstagram, String hallOfResidence,
-                  String faculty, String priceTier) {
+                  String faculty, String priceTier, User owner) {
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.contactPhone = contactPhone;
+        this.contactWhatsapp = contactWhatsapp;
+        this.contactInstagram = contactInstagram;
+        this.hallOfResidence = hallOfResidence;
+        this.faculty = faculty;
+        this.priceTier = priceTier;
+        this.owner = owner;
+    }
+
+    public void update(String name, String description, Category category, String contactPhone,
+                        String contactWhatsapp, String contactInstagram, String hallOfResidence,
+                        String faculty, String priceTier) {
         this.name = name;
         this.description = description;
         this.category = category;
@@ -94,8 +117,12 @@ public class Vendor {
         return contactInstagram;
     }
 
-    public boolean isVerified() {
-        return verified;
+    public VerificationStatus getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void changeVerificationStatus(VerificationStatus verificationStatus) {
+        this.verificationStatus = verificationStatus;
     }
 
     public Instant getCreatedAt() {
@@ -112,5 +139,9 @@ public class Vendor {
 
     public String getPriceTier() {
         return priceTier;
+    }
+
+    public Long getOwnerId() {
+        return owner == null ? null : owner.getId();
     }
 }

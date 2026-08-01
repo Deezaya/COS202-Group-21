@@ -11,13 +11,16 @@ public record VendorResponse(
         String contactPhone,
         String contactWhatsapp,
         String contactInstagram,
-        boolean verified,
+        String verificationStatus,
         Instant createdAt,
         String hallOfResidence,
         String faculty,
-        String priceTier) {
+        String priceTier,
+        Long ownerId,
+        Double averageRating,
+        Long reviewCount) {
 
-    public static VendorResponse from(Vendor vendor) {
+    public static VendorResponse from(Vendor vendor, double averageRating, long reviewCount) {
         return new VendorResponse(
                 vendor.getId(),
                 vendor.getName(),
@@ -26,10 +29,13 @@ public record VendorResponse(
                 vendor.getContactPhone(),
                 vendor.getContactWhatsapp(),
                 vendor.getContactInstagram(),
-                vendor.isVerified(),
+                vendor.getVerificationStatus().name(),
                 vendor.getCreatedAt(),
                 vendor.getHallOfResidence(),
                 vendor.getFaculty(),
-                vendor.getPriceTier());
+                vendor.getPriceTier(),
+                vendor.getOwnerId(),
+                averageRating,
+                reviewCount);
     }
 }
