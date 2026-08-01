@@ -4,6 +4,8 @@ import com.univendor.backend.category.Category;
 import com.univendor.backend.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -38,8 +40,9 @@ public class Vendor {
 
     private String contactInstagram;
 
-    @Column(nullable = false)
-    private boolean verified = false;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status", nullable = false)
+    private VerificationStatus verificationStatus = VerificationStatus.NONE;
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -114,8 +117,12 @@ public class Vendor {
         return contactInstagram;
     }
 
-    public boolean isVerified() {
-        return verified;
+    public VerificationStatus getVerificationStatus() {
+        return verificationStatus;
+    }
+
+    public void changeVerificationStatus(VerificationStatus verificationStatus) {
+        this.verificationStatus = verificationStatus;
     }
 
     public Instant getCreatedAt() {

@@ -2,7 +2,9 @@ package com.univendor.backend.vendor;
 
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,13 +29,14 @@ public class VendorController {
     }
 
     @GetMapping
-    public List<VendorResponse> listVendors(
+    public PagedModel<VendorResponse> listVendors(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String q,
             @RequestParam(required = false) String hall,
             @RequestParam(required = false) String faculty,
-            @RequestParam(required = false) String priceTier) {
-        return vendorService.listVendors(category, q, hall, faculty, priceTier);
+            @RequestParam(required = false) String priceTier,
+            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return new PagedModel<>(vendorService.listVendors(category, q, hall, faculty, priceTier, pageable));
     }
 
     @GetMapping("/{id}")
@@ -58,6 +61,11 @@ public class VendorController {
     public ResponseEntity<Void> deleteVendor(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         vendorService.deleteVendor(id, currentUserId(jwt));
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/request-verification")
+    public VendorResponse requestVerification(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        return vendorService.requestVerification(id, currentUserId(jwt));
     }
 
     private Long currentUserId(Jwt jwt) {
