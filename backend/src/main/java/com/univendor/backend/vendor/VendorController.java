@@ -4,9 +4,13 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -38,8 +42,25 @@ public class VendorController {
     }
 
     @PostMapping
-    public ResponseEntity<VendorResponse> createVendor(@Valid @RequestBody VendorCreateRequest request) {
-        VendorResponse created = vendorService.createVendor(request);
+    public ResponseEntity<VendorResponse> createVendor(@Valid @RequestBody VendorCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        VendorResponse created = vendorService.createVendor(request, currentUserId(jwt));
         return ResponseEntity.created(URI.create("/api/vendors/" + created.id())).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public VendorResponse updateVendor(@PathVariable Long id, @Valid @RequestBody VendorCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt) {
+        return vendorService.updateVendor(id, request, currentUserId(jwt));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVendor(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        vendorService.deleteVendor(id, currentUserId(jwt));
+        return ResponseEntity.noContent().build();
+    }
+
+    private Long currentUserId(Jwt jwt) {
+        return Long.parseLong(jwt.getSubject());
     }
 }
