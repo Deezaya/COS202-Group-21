@@ -30,6 +30,7 @@ public class JwtService {
                 .expiresAt(now.plus(expirationMinutes, ChronoUnit.MINUTES))
                 .subject(String.valueOf(user.getId()))
                 .claim("email", user.getEmail())
+                .claim("role", user.getRole().name())
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();
