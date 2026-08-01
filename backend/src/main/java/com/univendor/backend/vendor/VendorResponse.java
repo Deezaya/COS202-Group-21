@@ -15,7 +15,8 @@ public record VendorResponse(
         Instant createdAt,
         String hallOfResidence,
         String faculty,
-        String priceTier) {
+        String priceTier,
+        Long ownerId) {
 
     public static VendorResponse from(Vendor vendor) {
         return new VendorResponse(
@@ -30,6 +31,7 @@ public record VendorResponse(
                 vendor.getCreatedAt(),
                 vendor.getHallOfResidence(),
                 vendor.getFaculty(),
-                vendor.getPriceTier());
+                vendor.getPriceTier(),
+                vendor.getOwnerId());
     }
 }
