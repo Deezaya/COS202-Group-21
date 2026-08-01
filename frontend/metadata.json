@@ -1,0 +1,6 @@
+{
+  "name": "UniVendor - UNILAG Student Business Directory",
+  "description": "Discover and connect with University of Lagos student-run businesses across campus, replacing WhatsApp status hunting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -43,17 +43,27 @@ public class Vendor {
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    private String hallOfResidence;
+
+    private String faculty;
+
+    private String priceTier;
+
     protected Vendor() {
     }
 
     public Vendor(String name, String description, Category category, String contactPhone,
-                  String contactWhatsapp, String contactInstagram) {
+                  String contactWhatsapp, String contactInstagram, String hallOfResidence,
+                  String faculty, String priceTier) {
         this.name = name;
         this.description = description;
         this.category = category;
         this.contactPhone = contactPhone;
         this.contactWhatsapp = contactWhatsapp;
         this.contactInstagram = contactInstagram;
+        this.hallOfResidence = hallOfResidence;
+        this.faculty = faculty;
+        this.priceTier = priceTier;
     }
 
     public Long getId() {
@@ -90,5 +100,17 @@ public class Vendor {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public String getHallOfResidence() {
+        return hallOfResidence;
+    }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public String getPriceTier() {
+        return priceTier;
     }
 }
