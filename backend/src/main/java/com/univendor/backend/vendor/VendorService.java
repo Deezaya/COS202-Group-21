@@ -17,8 +17,9 @@ public class VendorService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<VendorResponse> listVendors(String categorySlug, String keyword) {
-        return vendorRepository.search(categorySlug, keyword).stream()
+    public List<VendorResponse> listVendors(String categorySlug, String keyword, String hall, String faculty,
+            String priceTier) {
+        return vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier).stream()
                 .map(VendorResponse::from)
                 .toList();
     }
@@ -39,7 +40,10 @@ public class VendorService {
                 category,
                 request.contactPhone(),
                 request.contactWhatsapp(),
-                request.contactInstagram());
+                request.contactInstagram(),
+                request.hallOfResidence(),
+                request.faculty(),
+                request.priceTier());
 
         return VendorResponse.from(vendorRepository.save(vendor));
     }

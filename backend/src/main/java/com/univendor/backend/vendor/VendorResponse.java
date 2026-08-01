@@ -12,7 +12,10 @@ public record VendorResponse(
         String contactWhatsapp,
         String contactInstagram,
         boolean verified,
-        Instant createdAt) {
+        Instant createdAt,
+        String hallOfResidence,
+        String faculty,
+        String priceTier) {
 
     public static VendorResponse from(Vendor vendor) {
         return new VendorResponse(
@@ -24,6 +27,9 @@ public record VendorResponse(
                 vendor.getContactWhatsapp(),
                 vendor.getContactInstagram(),
                 vendor.isVerified(),
-                vendor.getCreatedAt());
+                vendor.getCreatedAt(),
+                vendor.getHallOfResidence(),
+                vendor.getFaculty(),
+                vendor.getPriceTier());
     }
 }
