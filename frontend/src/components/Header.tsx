@@ -111,10 +111,10 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-display font-extrabold text-2xl tracking-tight text-[#18181B]">
+                <span className="font-display font-extrabold text-lg sm:text-2xl tracking-tight text-[#18181B]">
                   Uni<span className="text-[#E11D48]">Vendor</span>
                 </span>
-                <span className="inline-block bg-[#FFE4E6] text-[#E11D48] border border-[#E11D48]/20 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full font-display">
+                <span className="hidden sm:inline-block bg-[#FFE4E6] text-[#E11D48] border border-[#E11D48]/20 text-[10px] font-extrabold px-1.5 py-0.2 rounded-full font-display">
                   UNILAG
                 </span>
               </div>
@@ -180,7 +180,7 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <span className="text-[#E11D48]">{currentLayoutInfo.icon}</span>
               <span className="hidden xl:inline">{currentLayoutInfo.label}</span>
-              <span className="bg-[#E11D48]/10 text-[#E11D48] text-[10px] px-1.5 py-0.5 rounded-md font-extrabold">
+              <span className="hidden sm:inline bg-[#E11D48]/10 text-[#E11D48] text-[10px] px-1.5 py-0.5 rounded-md font-extrabold">
                 {currentLayoutInfo.badge}
               </span>
             </button>
@@ -271,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <PlusCircle className="w-4 h-4" />
             <span className="hidden xl:inline">Add Student Business</span>
-            <span className="xl:hidden">Add Vendor</span>
+            <span className="hidden sm:inline xl:hidden">Add Vendor</span>
           </button>
 
           {/* Mobile Menu Toggle Button */}
@@ -287,7 +287,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#E5E5E5] bg-white px-4 py-3 space-y-2 animate-in slide-in-from-top duration-200">
+        <div className="lg:hidden border-t border-[#E5E5E5] bg-white px-4 py-3 space-y-2 animate-in slide-in-from-top duration-200">
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => {
