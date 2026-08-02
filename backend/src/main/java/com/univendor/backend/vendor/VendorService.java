@@ -35,7 +35,7 @@ public class VendorService {
 
     public Page<VendorResponse> listVendors(String categorySlug, String keyword, String hall, String faculty,
             String priceTier, Pageable pageable) {
-        Page<Vendor> vendors = vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier, pageable);
+        Page<Vendor> vendors = vendorRepository.search(categorySlug, keyword, hall, faculty, priceTier, null, pageable);
         Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.getContent().stream().map(Vendor::getId).toList());
         return vendors.map(v -> toResponse(v, ratings));
     }
@@ -115,10 +115,10 @@ public class VendorService {
         return toResponse(saved, ratingsFor(List.of(id)));
     }
 
-    public List<VendorResponse> listVendorsByStatus(VerificationStatus status) {
-        List<Vendor> vendors = vendorRepository.findByVerificationStatus(status);
-        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.stream().map(Vendor::getId).toList());
-        return vendors.stream().map(v -> toResponse(v, ratings)).toList();
+    public Page<VendorResponse> listVendorsByStatus(VerificationStatus status, Pageable pageable) {
+        Page<Vendor> vendors = vendorRepository.search(null, null, null, null, null, status, pageable);
+        Map<Long, VendorRatingSummary> ratings = ratingsFor(vendors.getContent().stream().map(Vendor::getId).toList());
+        return vendors.map(v -> toResponse(v, ratings));
     }
 
     @Transactional
@@ -134,6 +134,13 @@ public class VendorService {
     private VendorResponse changeStatus(Long id, VerificationStatus status) {
         Vendor vendor = vendorRepository.findByIdWithCategory(id)
                 .orElseThrow(() -> new NotFoundException("Vendor " + id + " not found"));
+
+        VerificationStatus current = vendor.getVerificationStatus();
+        if (current != VerificationStatus.PENDING) {
+            throw new ConflictException("Vendor is not pending verification (current status: "
+                    + current.name().toLowerCase() + ")");
+        }
+
         vendor.changeVerificationStatus(status);
         Vendor saved = vendorRepository.save(vendor);
         return toResponse(saved, ratingsFor(List.of(id)));

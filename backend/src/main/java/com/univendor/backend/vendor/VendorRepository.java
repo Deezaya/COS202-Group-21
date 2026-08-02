@@ -1,6 +1,5 @@
 package com.univendor.backend.vendor;
 
-import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +18,12 @@ public interface VendorRepository extends JpaRepository<Vendor, Long> {
             AND (:hall IS NULL OR v.hallOfResidence = :hall)
             AND (:faculty IS NULL OR v.faculty = :faculty)
             AND (:priceTier IS NULL OR v.priceTier = :priceTier)
+            AND (:status IS NULL OR v.verificationStatus = :status)
             """)
     Page<Vendor> search(@Param("categorySlug") String categorySlug, @Param("keyword") String keyword,
             @Param("hall") String hall, @Param("faculty") String faculty, @Param("priceTier") String priceTier,
-            Pageable pageable);
+            @Param("status") VerificationStatus status, Pageable pageable);
 
     @Query("SELECT v FROM Vendor v JOIN FETCH v.category WHERE v.id = :id")
     Optional<Vendor> findByIdWithCategory(@Param("id") Long id);
-
-    @Query("""
-            SELECT v FROM Vendor v JOIN FETCH v.category
-            WHERE (:status IS NULL OR v.verificationStatus = :status)
-            ORDER BY v.id
-            """)
-    List<Vendor> findByVerificationStatus(@Param("status") VerificationStatus status);
 }
