@@ -22,6 +22,10 @@ export interface VendorSearchParams {
   priceTier?: string;
 }
 
+interface PagedResponse<T> {
+  content: T[];
+}
+
 export function fetchVendors(params: VendorSearchParams = {}): Promise<VendorResponseDto[]> {
   const query = new URLSearchParams();
   if (params.category) query.set('category', params.category);
@@ -31,7 +35,9 @@ export function fetchVendors(params: VendorSearchParams = {}): Promise<VendorRes
   if (params.priceTier) query.set('priceTier', params.priceTier);
 
   const queryString = query.toString();
-  return getJson<VendorResponseDto[]>(`/api/vendors${queryString ? `?${queryString}` : ''}`);
+  return getJson<PagedResponse<VendorResponseDto>>(`/api/vendors${queryString ? `?${queryString}` : ''}`).then(
+    (page) => page.content
+  );
 }
 
 export function fetchVendorById(id: string): Promise<VendorResponseDto> {
