@@ -1,10 +1,10 @@
 package com.univendor.backend.vendor;
 
+import com.univendor.backend.common.PagedResponses;
 import jakarta.validation.Valid;
 import java.net.URI;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,8 +35,8 @@ public class VendorController {
             @RequestParam(required = false) String hall,
             @RequestParam(required = false) String faculty,
             @RequestParam(required = false) String priceTier,
-            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
-        return new PagedModel<>(vendorService.listVendors(category, q, hall, faculty, priceTier, pageable));
+            Pageable pageable) {
+        return PagedResponses.of(vendorService.listVendors(category, q, hall, faculty, priceTier, pageable));
     }
 
     @GetMapping("/{id}")

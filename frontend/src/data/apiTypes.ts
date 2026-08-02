@@ -4,6 +4,8 @@ export interface CategoryResponseDto {
   slug: string;
 }
 
+export type VerificationStatusDto = 'NONE' | 'PENDING' | 'VERIFIED' | 'REJECTED';
+
 export interface VendorResponseDto {
   id: number;
   name: string;
@@ -12,7 +14,7 @@ export interface VendorResponseDto {
   contactPhone: string;
   contactWhatsapp: string | null;
   contactInstagram: string | null;
-  verified: boolean;
+  verificationStatus: VerificationStatusDto;
   createdAt: string;
   hallOfResidence: string | null;
   faculty: string | null;

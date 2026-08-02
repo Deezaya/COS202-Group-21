@@ -19,3 +19,31 @@ export function formatPrice(amount: number): string {
     .format(amount)
     .replace('NGN', '₦');
 }
+
+interface DecodedJwt {
+  sub: string;
+  email: string;
+  role: string;
+  exp: number;
+}
+
+// Reads the JWT's own claims client-side (no /me endpoint exists on the backend yet).
+export function decodeJwt(token: string): DecodedJwt | null {
+  try {
+    const payload = token.split('.')[1];
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+        .join('')
+    );
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+export function isJwtExpired(decoded: DecodedJwt): boolean {
+  return decoded.exp * 1000 < Date.now();
+}

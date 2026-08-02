@@ -85,7 +85,15 @@ export interface Vendor {
 
 export type LayoutDirection = 'flyer-feed' | 'marketplace-grid' | 'bento-spotlight';
 
-export type ViewMode = 'home' | 'directory' | 'saved' | 'register';
+export type ViewMode = 'landing' | 'home' | 'directory' | 'saved' | 'login' | 'signup';
+
+export type UserRole = 'STUDENT' | 'ADMIN';
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  role: UserRole;
+}
 
 export interface FilterState {
   searchQuery: string;

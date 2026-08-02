@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { LayoutDirection, ViewMode } from '../types';
-import { 
-  Search, 
-  Heart, 
-  PlusCircle, 
-  Sparkles, 
-  Grid, 
-  Columns3, 
+import { AuthUser, LayoutDirection, ViewMode } from '../types';
+import {
+  Search,
+  Heart,
+  PlusCircle,
+  Sparkles,
+  Grid,
+  Columns3,
   LayoutTemplate,
   Menu,
   X,
   MapPin,
   CheckCircle2,
   Store,
-  Compass
+  Compass,
+  LogIn,
+  LogOut,
+  UserPlus
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,6 +26,10 @@ interface HeaderProps {
   onSelectLayoutDirection: (direction: LayoutDirection) => void;
   savedCount: number;
   onOpenRegisterModal: () => void;
+  currentUser: AuthUser | null;
+  onOpenLogin: () => void;
+  onOpenSignup: () => void;
+  onLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,7 +38,11 @@ export const Header: React.FC<HeaderProps> = ({
   layoutDirection,
   onSelectLayoutDirection,
   savedCount,
-  onOpenRegisterModal
+  onOpenRegisterModal,
+  currentUser,
+  onOpenLogin,
+  onOpenSignup,
+  onLogout
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showLayoutMenu, setShowLayoutMenu] = useState(false);
@@ -115,7 +126,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-2xl border border-[#E5E5E5]">
+        <nav className="hidden lg:flex items-center gap-1 bg-[#F4F4F5] p-1 rounded-2xl border border-[#E5E5E5]">
           <button
             onClick={() => onSelectView('home')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all font-display ${
@@ -168,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
               title="Compare layout variations"
             >
               <span className="text-[#E11D48]">{currentLayoutInfo.icon}</span>
-              <span className="hidden lg:inline">{currentLayoutInfo.label}</span>
+              <span className="hidden xl:inline">{currentLayoutInfo.label}</span>
               <span className="bg-[#E11D48]/10 text-[#E11D48] text-[10px] px-1.5 py-0.5 rounded-md font-extrabold">
                 {currentLayoutInfo.badge}
               </span>
@@ -221,20 +232,52 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
+          {/* Auth: Sign In / Sign Up, or the signed-in user's chip */}
+          {currentUser ? (
+            <div className="hidden lg:flex items-center gap-1.5 bg-[#F4F4F5] pl-3 pr-1.5 py-1 rounded-xl border border-[#E5E5E5]">
+              <span className="text-xs font-bold text-[#18181B] font-display truncate max-w-[140px]" title={currentUser.email}>
+                {currentUser.email}
+              </span>
+              <button
+                onClick={onLogout}
+                className="p-1.5 rounded-lg text-[#52525B] hover:text-[#E11D48] hover:bg-white transition"
+                title="Sign out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="hidden lg:flex items-center gap-1.5">
+              <button
+                onClick={onOpenLogin}
+                className="text-xs font-bold font-display text-[#18181B] hover:text-[#E11D48] px-2.5 py-2 transition"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={onOpenSignup}
+                className="flex items-center gap-1.5 bg-[#18181B] hover:bg-black active:scale-95 text-white text-xs font-bold font-display px-3.5 py-2 rounded-xl shadow-xs transition-all"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Sign Up</span>
+              </button>
+            </div>
+          )}
+
           {/* List Your Student Business Button */}
           <button
             onClick={onOpenRegisterModal}
             className="flex items-center gap-1.5 bg-[#E11D48] hover:bg-[#BE123C] active:scale-95 text-white text-xs font-bold font-display px-3.5 py-2 rounded-xl shadow-xs transition-all"
           >
             <PlusCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Student Business</span>
-            <span className="sm:hidden">Add Vendor</span>
+            <span className="hidden xl:inline">Add Student Business</span>
+            <span className="xl:hidden">Add Vendor</span>
           </button>
 
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-[#18181B] hover:bg-[#F4F4F5] rounded-xl transition"
+            className="lg:hidden p-2 text-[#18181B] hover:bg-[#F4F4F5] rounded-xl transition"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -288,6 +331,48 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </button>
           </div>
+
+          {/* Auth: Sign In / Sign Up, or the signed-in user's row */}
+          {currentUser ? (
+            <div className="p-2.5 bg-[#F4F4F5] rounded-xl border border-[#E5E5E5] flex items-center justify-between">
+              <span className="text-xs font-bold text-[#18181B] font-display truncate" title={currentUser.email}>
+                {currentUser.email}
+              </span>
+              <button
+                onClick={() => {
+                  onLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-1 text-xs font-display font-bold text-[#E11D48]"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => {
+                  onOpenLogin();
+                  setMobileMenuOpen(false);
+                }}
+                className="p-2.5 rounded-xl text-center text-xs font-bold font-display flex items-center justify-center gap-1.5 bg-[#F4F4F5] text-[#18181B]"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  onOpenSignup();
+                  setMobileMenuOpen(false);
+                }}
+                className="p-2.5 rounded-xl text-center text-xs font-bold font-display flex items-center justify-center gap-1.5 bg-[#18181B] text-white"
+              >
+                <UserPlus className="w-4 h-4" />
+                Sign Up
+              </button>
+            </div>
+          )}
 
           <div className="p-2.5 bg-[#FFE4E6]/50 rounded-xl border border-[#FECDD3] flex items-center justify-between">
             <div className="text-xs font-body">
