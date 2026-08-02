@@ -1,6 +1,7 @@
 package com.univendor.backend.vendor;
 
 import com.univendor.backend.category.Category;
+import com.univendor.backend.common.ConflictException;
 import com.univendor.backend.user.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -121,8 +122,33 @@ public class Vendor {
         return verificationStatus;
     }
 
-    public void changeVerificationStatus(VerificationStatus verificationStatus) {
-        this.verificationStatus = verificationStatus;
+    public void requestVerification() {
+        if (verificationStatus == VerificationStatus.PENDING || verificationStatus == VerificationStatus.VERIFIED) {
+            throw new ConflictException("Vendor is already " + verificationStatus.name().toLowerCase());
+        }
+        verificationStatus = VerificationStatus.PENDING;
+    }
+
+    public void verify() {
+        if (verificationStatus == VerificationStatus.VERIFIED) {
+            return;
+        }
+        if (verificationStatus != VerificationStatus.PENDING) {
+            throw new ConflictException(
+                    "Vendor cannot be verified from status: " + verificationStatus.name().toLowerCase());
+        }
+        verificationStatus = VerificationStatus.VERIFIED;
+    }
+
+    public void reject() {
+        if (verificationStatus == VerificationStatus.REJECTED) {
+            return;
+        }
+        if (verificationStatus != VerificationStatus.PENDING && verificationStatus != VerificationStatus.VERIFIED) {
+            throw new ConflictException(
+                    "Vendor cannot be rejected from status: " + verificationStatus.name().toLowerCase());
+        }
+        verificationStatus = VerificationStatus.REJECTED;
     }
 
     public Instant getCreatedAt() {

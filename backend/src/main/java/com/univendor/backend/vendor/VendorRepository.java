@@ -11,18 +11,16 @@ public interface VendorRepository extends JpaRepository<Vendor, Long> {
 
     @Query("""
             SELECT v FROM Vendor v JOIN FETCH v.category c
-            WHERE (:categorySlug IS NULL OR c.slug = :categorySlug)
-            AND (:keyword IS NULL
-                 OR LOWER(v.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                 OR LOWER(v.description) LIKE LOWER(CONCAT('%', :keyword, '%')))
-            AND (:hall IS NULL OR v.hallOfResidence = :hall)
-            AND (:faculty IS NULL OR v.faculty = :faculty)
-            AND (:priceTier IS NULL OR v.priceTier = :priceTier)
-            AND (:status IS NULL OR v.verificationStatus = :status)
+            WHERE (:#{#criteria.categorySlug()} IS NULL OR c.slug = :#{#criteria.categorySlug()})
+            AND (:#{#criteria.keyword()} IS NULL
+                 OR LOWER(v.name) LIKE LOWER(CONCAT('%', :#{#criteria.keyword()}, '%'))
+                 OR LOWER(v.description) LIKE LOWER(CONCAT('%', :#{#criteria.keyword()}, '%')))
+            AND (:#{#criteria.hall()} IS NULL OR v.hallOfResidence = :#{#criteria.hall()})
+            AND (:#{#criteria.faculty()} IS NULL OR v.faculty = :#{#criteria.faculty()})
+            AND (:#{#criteria.priceTier()} IS NULL OR v.priceTier = :#{#criteria.priceTier()})
+            AND (:#{#criteria.status()} IS NULL OR v.verificationStatus = :#{#criteria.status()})
             """)
-    Page<Vendor> search(@Param("categorySlug") String categorySlug, @Param("keyword") String keyword,
-            @Param("hall") String hall, @Param("faculty") String faculty, @Param("priceTier") String priceTier,
-            @Param("status") VerificationStatus status, Pageable pageable);
+    Page<Vendor> search(@Param("criteria") VendorSearchCriteria criteria, Pageable pageable);
 
     @Query("SELECT v FROM Vendor v JOIN FETCH v.category WHERE v.id = :id")
     Optional<Vendor> findByIdWithCategory(@Param("id") Long id);
