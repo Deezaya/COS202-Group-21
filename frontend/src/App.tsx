@@ -14,6 +14,8 @@ import { fetchCategories, fetchVendors, fetchVendorById } from './services/api';
 import { adaptCategory, adaptVendor, mergeLocalReviews } from './data/adapters';
 import { decodeJwt, isJwtExpired } from './utils/helpers';
 
+// Stored in localStorage rather than an httpOnly cookie - a known XSS surface for the token,
+// accepted here since the backend has no cookie-session support to switch to.
 const AUTH_TOKEN_KEY = 'univendor_auth_token';
 
 function readStoredToken(): string | null {
