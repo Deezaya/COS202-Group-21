@@ -1,12 +1,12 @@
 package com.univendor.backend.admin;
 
+import com.univendor.backend.common.PagedResponses;
 import com.univendor.backend.review.ReviewService;
 import com.univendor.backend.vendor.VendorResponse;
 import com.univendor.backend.vendor.VendorService;
 import com.univendor.backend.vendor.VerificationStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedModel;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +28,8 @@ public class AdminController {
 
     @GetMapping("/api/admin/vendors")
     public PagedModel<VendorResponse> listVendors(@RequestParam(required = false) VerificationStatus status,
-            @PageableDefault(size = 20, sort = "id") Pageable pageable) {
-        return new PagedModel<>(vendorService.listVendorsByStatus(status, pageable));
+            Pageable pageable) {
+        return PagedResponses.of(vendorService.listVendorsByStatus(status, pageable));
     }
 
     @PostMapping("/api/admin/vendors/{id}/verify")
