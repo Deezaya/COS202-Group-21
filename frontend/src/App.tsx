@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Category, CategoryId, LayoutDirection, Vendor, VendorReview, ViewMode } from './types';
+import { AuthUser, Category, CategoryId, LayoutDirection, Vendor, VendorReview, ViewMode } from './types';
 import { Header } from './components/Header';
+import { LandingView } from './components/LandingView';
+import { LoginView } from './components/LoginView';
+import { SignupView } from './components/SignupView';
 import { HomeDiscoverView } from './components/HomeDiscoverView';
 import { VendorListingView } from './components/VendorListingView';
 import { SavedVendorsView } from './components/SavedVendorsView';
@@ -9,6 +12,21 @@ import { RegisterVendorModal } from './components/RegisterVendorModal';
 import { Heart, Compass, Store, PlusCircle, ShieldCheck, MessageCircle } from 'lucide-react';
 import { fetchCategories, fetchVendors, fetchVendorById } from './services/api';
 import { adaptCategory, adaptVendor, mergeLocalReviews } from './data/adapters';
+import { decodeJwt, isJwtExpired } from './utils/helpers';
+
+const AUTH_TOKEN_KEY = 'univendor_auth_token';
+
+function readStoredToken(): string | null {
+  try {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token) return null;
+    const decoded = decodeJwt(token);
+    if (!decoded || isJwtExpired(decoded)) return null;
+    return token;
+  } catch {
+    return null;
+  }
+}
 
 export default function App() {
   // Vendors fetched from the real backend API
@@ -50,8 +68,27 @@ export default function App() {
   // Layout Direction Variation State ('flyer-feed' | 'marketplace-grid' | 'bento-spotlight')
   const [layoutDirection, setLayoutDirection] = useState<LayoutDirection>('marketplace-grid');
 
-  // Navigation View State ('home' | 'directory' | 'saved')
-  const [currentView, setCurrentView] = useState<ViewMode>('home');
+  // JWT from /api/auth/login|register - decoded client-side, no /me endpoint exists yet
+  const [authToken, setAuthToken] = useState<string | null>(readStoredToken);
+
+  const currentUser = useMemo<AuthUser | null>(() => {
+    if (!authToken) return null;
+    const decoded = decodeJwt(authToken);
+    if (!decoded || isJwtExpired(decoded)) return null;
+    return { id: decoded.sub, email: decoded.email, role: decoded.role as AuthUser['role'] };
+  }, [authToken]);
+
+  // Drop a stale/expired token rather than keep re-deriving a null user from it
+  useEffect(() => {
+    if (authToken && !currentUser) {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      setAuthToken(null);
+    }
+  }, [authToken, currentUser]);
+
+  // Navigation View State - starts on the marketing page for signed-out visitors,
+  // skips straight to the product for anyone with a valid session
+  const [currentView, setCurrentView] = useState<ViewMode>(() => (readStoredToken() ? 'home' : 'landing'));
 
   // Directory filter initial states when navigating from Home
   const [directoryCategoryId, setDirectoryCategoryId] = useState<CategoryId>('all');
@@ -140,6 +177,20 @@ export default function App() {
     setLocalVendors(prev => [newVendor, ...prev]);
   };
 
+  const handleAuthenticated = (token: string) => {
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+    setAuthToken(token);
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    setAuthToken(null);
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleAddReview = (vendorId: string, review: Omit<VendorReview, 'id' | 'date'>) => {
     const newReviewObj: VendorReview = {
       ...review,
@@ -173,10 +224,38 @@ export default function App() {
         onSelectLayoutDirection={setLayoutDirection}
         savedCount={savedVendorIds.length}
         onOpenRegisterModal={() => setRegisterModalOpen(true)}
+        currentUser={currentUser}
+        onOpenLogin={() => setCurrentView('login')}
+        onOpenSignup={() => setCurrentView('signup')}
+        onLogout={handleLogout}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        {currentView === 'landing' && (
+          <LandingView
+            categories={categories}
+            onNavigateToDirectory={handleNavigateToDirectory}
+            onOpenSignup={() => setCurrentView('signup')}
+            onOpenLogin={() => setCurrentView('login')}
+            onOpenRegisterModal={() => setRegisterModalOpen(true)}
+          />
+        )}
+
+        {currentView === 'login' && (
+          <LoginView
+            onAuthenticated={handleAuthenticated}
+            onNavigateToSignup={() => setCurrentView('signup')}
+          />
+        )}
+
+        {currentView === 'signup' && (
+          <SignupView
+            onAuthenticated={handleAuthenticated}
+            onNavigateToLogin={() => setCurrentView('login')}
+          />
+        )}
+
         {currentView === 'home' && (
           <HomeDiscoverView
             vendors={vendors}
