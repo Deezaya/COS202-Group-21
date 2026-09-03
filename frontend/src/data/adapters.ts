@@ -38,12 +38,19 @@ export const CUSTOM_VENDOR_COVER_IMAGES: Record<string, string> = {
   '15': 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'  // Hall Surprises & Saxophone
 };
 
-export const CUSTOM_VENDOR_CONTACTS: Record<string, { whatsapp?: string; instagram?: string; name?: string; description?: string }> = {
+export const CUSTOM_VENDOR_CONTACTS: Record<string, { whatsapp?: string; instagram?: string; name?: string; description?: string; services?: string[]; portfolio?: string[] }> = {
   '1': {
     name: 'Scented Desire',
     whatsapp: '+2348126647753',
     instagram: '@scented_desire',
-    description: 'Luxury designer perfume oils, body mists, fragrance gift sets, and room diffusers delivered across all UNILAG halls.'
+    description: 'Luxury designer perfume oils, body mists, fragrance gift sets, and room diffusers delivered across all UNILAG halls.',
+    services: ['Perfume Oils', 'Body Mists', 'Fragrance Gift Sets', 'Room Diffusers', 'Designer Fragrances'],
+    portfolio: [
+      '/images/scented desire.jpg',
+      'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=800&q=80'
+    ]
   }
 };
 
@@ -69,6 +76,8 @@ export function adaptVendor(dto: VendorResponseDto): Vendor {
   const vendorDesc = customContact.description || dto.description;
   const whatsapp = customContact.whatsapp || dto.contactWhatsapp || dto.contactPhone;
   const instagram = customContact.instagram || dto.contactInstagram || '';
+  const services = customContact.services || [dto.category.name];
+  const portfolio = customContact.portfolio || [coverImage, `https://picsum.photos/seed/univendor-${id}-p1/600/600`, `https://picsum.photos/seed/univendor-${id}-p2/600/600`];
 
   return {
     id,
@@ -79,7 +88,7 @@ export function adaptVendor(dto: VendorResponseDto): Vendor {
     ownerLevel: 'Verified Campus Business',
     hall: hall as Vendor['hall'],
     faculty: (dto.faculty || 'Faculty of Social Sciences') as Vendor['faculty'],
-    phone: dto.contactPhone,
+    phone: whatsapp,
     whatsapp,
     instagram,
     priceLevel,
@@ -96,33 +105,9 @@ export function adaptVendor(dto: VendorResponseDto): Vendor {
     cardBgColor: presentation.cardBg,
     coverImage,
     avatarImage,
-    portfolio: [coverImage, `https://picsum.photos/seed/univendor-${id}-p1/600/600`, `https://picsum.photos/seed/univendor-${id}-p2/600/600`],
+    portfolio,
     description: vendorDesc,
-    services: [dto.category.name],
-    operatingHours: 'Mon - Sat: 9:00 AM - 8:00 PM',
-    status: 'Available Today',
-    deliveryNote: `Delivering around ${hall} and surrounding campus halls.`,
-    joinedDate: new Date(dto.createdAt).toLocaleDateString('en-NG', { month: 'short', year: 'numeric' }),
-    reviews: []
-  };
-}
-    priceLevel,
-    startingPrice: STARTING_PRICE_BY_TIER[priceLevel] || STARTING_PRICE_BY_TIER['₦₦'],
-    priceGuide: 'Contact on WhatsApp for full pricing details.',
-    rating: 0,
-    reviewCount: 0,
-    isVerified: dto.verificationStatus === 'VERIFIED',
-    isFeatured: dto.verificationStatus === 'VERIFIED',
-    stampText: presentation.stampLabel,
-    stampRotation: (seed % 9) - 4,
-    stampBgColor: presentation.stampBg,
-    stampTextColor: presentation.stampText,
-    cardBgColor: presentation.cardBg,
-    coverImage,
-    avatarImage,
-    portfolio: [coverImage, `https://picsum.photos/seed/univendor-${id}-p1/600/600`, `https://picsum.photos/seed/univendor-${id}-p2/600/600`],
-    description: dto.description,
-    services: [dto.category.name],
+    services,
     operatingHours: 'Mon - Sat: 9:00 AM - 8:00 PM',
     status: 'Available Today',
     deliveryNote: `Delivering around ${hall} and surrounding campus halls.`,
