@@ -11,7 +11,7 @@ INSERT INTO categories (name, slug) VALUES
   ('Events & Surprises', 'events');
 
 INSERT INTO vendors (name, description, category_id, contact_phone, contact_whatsapp, contact_instagram, verified, created_at, hall_of_residence, faculty, price_tier) VALUES
-  ('Mama Kemi Kitchen', 'Home-cooked Nigerian meals delivered around campus, daily menu of rice, swallow and stew combos.', (SELECT id FROM categories WHERE slug = 'catering'), '+2348012345678', '+2348012345678', '@mamakemikitchen', true, now(), 'Moremi Hall', 'Faculty of Arts', '₦'),
+  ('Scented Desire', 'Luxury designer perfume oils, body mists, fragrance gift sets, and room diffusers delivered across all UNILAG halls.', (SELECT id FROM categories WHERE slug = 'cosmetics'), '+2348126647753', '+2348126647753', '@scented_desire', true, now(), 'Moremi Hall', 'Faculty of Arts', '₦'),
   ('Snack Bae Unilag', 'Small chops, meat pies and chilled drinks for hostel parties and events, bulk orders welcome.', (SELECT id FROM categories WHERE slug = 'catering'), '+2348023456789', '+2348023456789', '@snackbaeunilag', false, now(), 'Sodeinde Hall', 'Faculty of Social Sciences', '₦'),
   ('Threadwork by Tolu', 'Custom ankara outfits and alterations, turnaround in 3-5 days, fittings done on campus.', (SELECT id FROM categories WHERE slug = 'fashion'), '+2348034567890', '+2348034567890', '@threadworkbytolu', true, now(), 'Mariere Hall', 'Faculty of Management Sciences', '₦₦₦'),
   ('Denim Republic NG', 'Thrift denim jackets and jeans resale, sizes for both guys and girls, new stock weekly.', (SELECT id FROM categories WHERE slug = 'fashion'), '+2348045678901', NULL, '@denimrepublicng', false, now(), 'Biobaku Hall', 'Faculty of Environmental Sciences', '₦₦'),
