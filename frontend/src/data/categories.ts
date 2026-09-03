@@ -4,13 +4,13 @@ type CategoryPresentation = Pick<Category, 'iconName' | 'stampLabel' | 'stampBg'
 
 export const CATEGORY_PRESENTATION: Record<string, CategoryPresentation> = {
   catering: {
-    iconName: 'Utensils',
-    stampLabel: 'MOREMI BITES 🍢',
+    iconName: 'Cosmetics',
+    stampLabel: 'SCENTED DESIRE ✨',
     stampBg: '#FFE4E6',
     stampText: '#FF385C',
     cardBg: '#FFFFFF',
-    description: 'Hot Jollof, juicy shawarma, puff-puff boxes, custom birthday cakes, and hall delivery.',
-    popularServices: ['Small Chops Box', 'Party Jollof & Turkey', 'Custom Birthday Cakes', 'Cocktail Jugs', 'Shawarma']
+    description: 'Fragrances that linger and leave a mark. Get a FREE small gift with every order this week!',
+    popularServices: ['Fragrances', 'Candles', 'Gift Sets', 'Diffusers','Perfume Oils']
   },
   fashion: {
     iconName: 'Shirt',
