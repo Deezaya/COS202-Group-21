@@ -53,7 +53,7 @@ export function adaptVendor(dto: VendorResponseDto): Vendor {
   const hall = dto.hallOfResidence || 'Off-Campus (Akoka / Bariga / Yaba)';
   const priceLevel = (dto.priceTier as Vendor['priceLevel']) || '₦₦';
   const coverImage = CUSTOM_VENDOR_COVER_IMAGES[id] || CUSTOM_VENDOR_COVER_IMAGES[dto.name] || `https://picsum.photos/seed/univendor-${id}-cover/800/600`;
-  const avatarImage = `https://picsum.photos/seed/univendor-${id}-avatar/200/200`;
+  const avatarImage = coverImage;
 
   return {
     id,
