@@ -21,7 +21,7 @@ const STARTING_PRICE_BY_TIER: Record<string, number> = {
  * You can set custom image URLs here or use local files placed in `frontend/public/` (e.g. '/images/my-cover.jpg').
  */
 export const CUSTOM_VENDOR_COVER_IMAGES: Record<string, string> = {
-  '1': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80', // Mama Kemi Kitchen
+  '1': '/images/scented desire.jpg', // Scented Desire Perfume Set
   '2': 'https://images.unsplash.com/photo-1541544741938-0af808871cc0?auto=format&fit=crop&w=800&q=80', // Snack Bae Unilag
   '3': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80', // Threadwork by Tolu (Custom Native & Y2K)
   '4': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80', // Denim Republic NG (Y2K Thrift Denim & Jackets)
@@ -36,6 +36,15 @@ export const CUSTOM_VENDOR_COVER_IMAGES: Record<string, string> = {
   '13': 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80', // GlowByDebby Skincare
   '14': 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?auto=format&fit=crop&w=800&q=80', // FreshExpress Laundry & Kicks
   '15': 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'  // Hall Surprises & Saxophone
+};
+
+export const CUSTOM_VENDOR_CONTACTS: Record<string, { whatsapp?: string; instagram?: string; name?: string; description?: string }> = {
+  '1': {
+    name: 'Scented Desire',
+    whatsapp: '+2348126647753',
+    instagram: '@scented_desire',
+    description: 'Luxury designer perfume oils, body mists, fragrance gift sets, and room diffusers delivered across all UNILAG halls.'
+  }
 };
 
 export function adaptCategory(dto: CategoryResponseDto): Category {
@@ -55,18 +64,48 @@ export function adaptVendor(dto: VendorResponseDto): Vendor {
   const coverImage = CUSTOM_VENDOR_COVER_IMAGES[id] || CUSTOM_VENDOR_COVER_IMAGES[dto.name] || `https://picsum.photos/seed/univendor-${id}-cover/800/600`;
   const avatarImage = coverImage;
 
+  const customContact = CUSTOM_VENDOR_CONTACTS[id] || {};
+  const vendorName = customContact.name || dto.name;
+  const vendorDesc = customContact.description || dto.description;
+  const whatsapp = customContact.whatsapp || dto.contactWhatsapp || dto.contactPhone;
+  const instagram = customContact.instagram || dto.contactInstagram || '';
+
   return {
     id,
-    name: dto.name,
-    tagline: dto.description.length > 90 ? `${dto.description.slice(0, 87)}...` : dto.description,
+    name: vendorName,
+    tagline: vendorDesc.length > 90 ? `${vendorDesc.slice(0, 87)}...` : vendorDesc,
     categoryId: dto.category.slug,
     ownerName: 'UNILAG Student Vendor',
     ownerLevel: 'Verified Campus Business',
     hall: hall as Vendor['hall'],
     faculty: (dto.faculty || 'Faculty of Social Sciences') as Vendor['faculty'],
     phone: dto.contactPhone,
-    whatsapp: dto.contactWhatsapp || dto.contactPhone,
-    instagram: dto.contactInstagram || '',
+    whatsapp,
+    instagram,
+    priceLevel,
+    startingPrice: STARTING_PRICE_BY_TIER[priceLevel] || STARTING_PRICE_BY_TIER['₦₦'],
+    priceGuide: 'Contact on WhatsApp for full pricing details.',
+    rating: 0,
+    reviewCount: 0,
+    isVerified: dto.verificationStatus === 'VERIFIED',
+    isFeatured: dto.verificationStatus === 'VERIFIED',
+    stampText: presentation.stampLabel,
+    stampRotation: (seed % 9) - 4,
+    stampBgColor: presentation.stampBg,
+    stampTextColor: presentation.stampText,
+    cardBgColor: presentation.cardBg,
+    coverImage,
+    avatarImage,
+    portfolio: [coverImage, `https://picsum.photos/seed/univendor-${id}-p1/600/600`, `https://picsum.photos/seed/univendor-${id}-p2/600/600`],
+    description: vendorDesc,
+    services: [dto.category.name],
+    operatingHours: 'Mon - Sat: 9:00 AM - 8:00 PM',
+    status: 'Available Today',
+    deliveryNote: `Delivering around ${hall} and surrounding campus halls.`,
+    joinedDate: new Date(dto.createdAt).toLocaleDateString('en-NG', { month: 'short', year: 'numeric' }),
+    reviews: []
+  };
+}
     priceLevel,
     startingPrice: STARTING_PRICE_BY_TIER[priceLevel] || STARTING_PRICE_BY_TIER['₦₦'],
     priceGuide: 'Contact on WhatsApp for full pricing details.',
